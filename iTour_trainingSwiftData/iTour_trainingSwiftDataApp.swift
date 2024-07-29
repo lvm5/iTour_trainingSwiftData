@@ -5,6 +5,7 @@
 //  Created by Leandro Morais on 29/07/24.
 //
 
+import SwiftData
 import SwiftUI
 
 @main
@@ -13,5 +14,6 @@ struct iTour_trainingSwiftDataApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: Destination.self)
     }
 }
