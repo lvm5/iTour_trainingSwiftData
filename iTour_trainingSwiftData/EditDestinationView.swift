@@ -6,13 +6,63 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct EditDestinationView: View {
+    @Bindable var destination: Destination
+    @State private var newSightName = ""
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        Form {
+            TextField("Name", text: $destination.name)
+            TextField("Details", text: $destination.details, axis: .vertical)
+            DatePicker("Date", selection: $destination.date)
+            
+            Section("Priority") {
+                Picker("Priority", selection: $destination.priority) {
+                    Text("Meh").tag(1)
+                    Text("Maybe").tag(2)
+                    Text("Must").tag(3)
+                }
+                .pickerStyle(.segmented)
+            }
+            
+            Section("Sights") {
+                ForEach(destination.sights) { sight in
+                    Text(sight.name)
+                }
+                
+                HStack {
+                    TextField("Add New Sight in \(destination.name)", text: $newSightName)
+                    
+                    Button("Add", action: addSight)
+                    
+                }
+            }
+        }
+        .navigationTitle("Edit Destination")
+        .navigationBarTitleDisplayMode(.inline)
     }
+    func addSight() {
+        guard newSightName.isEmpty == false else { return }
+        
+        withAnimation {
+            let sight = Sight(name: newSightName)
+            destination.sights.append(sight)
+            newSightName = ""
+        }
+    }
+    
 }
 
 #Preview {
-    EditDestinationView()
+    do {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let container = try ModelContainer(for: Destination.self, configurations: config)
+        let example = Destination(name: "Example Destination", details: "Example details go here and will automaticaly expand verticaly as they are edited.")
+        return EditDestinationView(destination: example)
+            .modelContainer(container)
+    } catch {
+        fatalError("Fail to create model container")
+    }
 }
